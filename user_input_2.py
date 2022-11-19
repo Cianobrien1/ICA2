@@ -1,7 +1,5 @@
 #!/usr/bin/python3
 import os
-import sys
-import subprocess
 path = "esearch_output"
 os.system("rm -fr ~/ICA2/esearch_output")
 os.system("mkdir -p ~/ICA2/esearch_output")
@@ -10,7 +8,7 @@ def esearch_input () :
     protein_name_in= input('Enter protein name: ')
     taxonID= input('Enter taxon ID: ')
     protein_name_arg = protein_name_in.replace(" ", "_")
-    esearch_cmd =  f"esearch -db protein -query '{protein_name_in}[PROTEIN]' 2>/dev/null | efilter -query txid'{taxonID}'[ORGANISM] 2>/dev/null | efetch -format fasta 2>/dev/null > ~/ICA2/esearch_output/{protein_name_arg}_{taxonID}.fasta"
+    esearch_cmd =  f"esearch -db protein -query '{protein_name_in}[PROTEIN]' 2>/dev/null | efilter -query txid'{taxonID}'[ORGANISM] NOT PARTIAL 2>/dev/null | efetch -format fasta 2>/dev/null > ~/ICA2/esearch_output/{protein_name_arg}_{taxonID}.fasta"
     os.system(esearch_cmd)
     return 
 esearch_input()
@@ -22,3 +20,9 @@ if os.stat(output_file_name).st_size == 0:
     esearch_input()
 else:
     print("Fasta file has been saved in esearch_output directory as "+output_file_name)
+with open(output_file_name) as output_file_data:
+    output_file_content = output_file_data.read()
+    output_file_seq_count = output_file_content.count('>')
+    if output_file_seq_count < 2
+        print('WARNING: Only 1 seuqence detected in fasta file')
+
