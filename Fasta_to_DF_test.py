@@ -1,10 +1,14 @@
 #!/usr/bin/python3
 import pandas as pd
-import os 
-import sys
-import subprocess
 import re
-my_file = open('4890_PDH.fasta')
+import os
+import sys
+path1 = os.getcwd()
+path2 = path1+"/esearch_output"
+os.chdir(path2)
+file_name = os.listdir()
+fasta_file = file_name[0]
+my_file = open(fasta_file) 
 id = []
 name = []
 organism = []
@@ -16,11 +20,10 @@ for eachline in my_file:
         edit = re.search('(\[.+\])', eachline)
         line1 = eachline.replace(edit.group(1), '')
         line2 = line1.split()
-        name.append(line2[1:])
-        edit1 = re.search('(>.+\[)', eachline)
-        line3 = eachline.replace(edit1.group(1), '')
-        line4 = line3.replace(']', '')
-        organism.append(line4)
+        line3 = line2[1:]
+        line4 = ' '.join(line3)
+        name.append(line4)
+        organism.append(edit.group(1)) 
     else:
         seq.append(eachline)
 	
