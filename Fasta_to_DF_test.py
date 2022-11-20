@@ -4,9 +4,9 @@ import re
 import os
 #Importing the moduels I will need for the script
 
-path1 = os.getcwd()
-path2 = path1+"/esearch_output"
-#Since ~ wont work for homespace, I assign the path using os.getcwd() + the name of the directroy I want to target to generalise the script
+path1 = os.environ['HOME']
+path2 = path1+"/ICA2/esearch_output"
+#Since ~ wont work for homespace, I assign the path using os.environ['HOME'] + the name of the directroy I want to target to generalise the script
 
 file_name = os.listdir(path2)
 #Listing the directory gives the name of the file in list format
@@ -14,7 +14,7 @@ file_name = os.listdir(path2)
 fasta_file = file_name[0]
 #fasta_file is being assigned as the first namein the list above, which is just the file name in string format
 
-my_file = open(fasta_file) 
+my_file = open(path2+"/"+fasta_file) 
 #opening the fasta file for the script to work on
 
 id = []
@@ -52,6 +52,6 @@ s_seq = pd.Series(seq)
 df = pd.DataFrame({'ID' : s_id, 'Name' : s_name, 'Organism' : s_organism, 'Sequence' : s_seq})
 #Creates a dataframe with the series
 
-df.to_csv(fasta_file+'.csv', sep='\t')
+df.to_csv(path2+"/"+fasta_file+'.csv', sep='\t')
 #Outputs the dataframe to a csv file
 
