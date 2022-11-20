@@ -2,9 +2,9 @@
 import os
 #Imports os module
 
-path1 = os.getcwd()
-path2 = path1+'/esearch_output'
-#Since ~ wont work, this is my way to generalise the script to work with any user's homespace. It adds the directroy name to the users current working directory path, so it will work with any user
+path1 = os.environ['HOME']
+path2 = path1+'/ICA2/esearch_output'
+#Since ~ wont work, this is my way to generalise the script to work with any user's homespace. 
 
 os.system("rm -fr ~/ICA2/esearch_output")
 os.system("mkdir -p ~/ICA2/esearch_output")
@@ -38,7 +38,7 @@ dir_content = os.listdir(path2)
 output_file_name = dir_content[0]
 #Assigning the output_file_name variable as the first item in the listdir() list.
 
-if os.stat(output_file_name).st_size == 0:
+if os.stat(path2+"/"+output_file_name).st_size == 0:
     os.system('rm -fr {output_file_name}')
     print('Function input invalid, please try again')
     esearch_input()
@@ -48,9 +48,9 @@ else:
     print("Fasta file has been saved in esearch_output directory as "+output_file_name)
 #If the file contains text, it tells the user the file has been saved in the esearch_output directory
 
-with open(output_file_name) as output_file_data:
+with open(path2+"/"+output_file_name) as output_file_data:
     output_file_content = output_file_data.read()
     output_file_seq_count = output_file_content.count('>')
-    if output_file_seq_count < 2
+    if output_file_seq_count < 2:
         print('WARNING: Only 1 seuqence detected in fasta file')
 #Checks that more than 1 sequence is in the fasta file. If there less than 2 sequences in the file, it warns the user.
