@@ -11,7 +11,7 @@ os.system("mkdir -p ~/ICA2/esearch_output")
 #Removes the output directory if it exits, then creates the output directory and any parent directories necessary
 
 def esearch_input () :
-#Defines the esearch_input function
+#Defines the esearch_input function.
 
     protein_name_in= input('Enter protein name: ')
     taxonID= input('Enter taxon ID: ')
