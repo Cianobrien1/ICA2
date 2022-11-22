@@ -6,6 +6,9 @@ import os
 
 path1 = os.environ['HOME']
 path2 = path1+"/ICA2/esearch_output"
+os.system('rm -fr ~/ICA2/csv_file_dir')
+os.system('mkdir -p ~/ICA2/csv_file_dir')
+path3 = path1+'/ICA2/csv_file_dir'
 #Since ~ wont work for homespace, I assign the path using os.environ['HOME'] + the name of the directroy I want to target to generalise the script
 
 file_name = os.listdir(path2)
@@ -51,7 +54,22 @@ s_seq = pd.Series(seq)
 
 df = pd.DataFrame({'ID' : s_id, 'Name' : s_name, 'Organism' : s_organism, 'Sequence' : s_seq})
 #Creates a dataframe with the series
+Organism_count = df['Organism'].value_counts()
+print(Organism_count)
+number_of_organisms = len(df['Organism'].value_counts())
 
-df.to_csv(path2+"/"+fasta_file+'.csv', sep='\t')
-#Outputs the dataframe to a csv file
+def user_input(question= 'There are '+str(number_of_organisms)+' organisms represented in the FASTA file, do you want to continue? [y/n]'):
+    reply = str(input(question+' (y/n): ')).lower().strip()
+    if reply[0] == 'y':
+        return True
+    if reply[0] == 'n':
+        csv_arg = path3+'/'+fasta_file+'.csv'
+        df.to_csv(csv_arg, sep='\t')
+        #Outputs the dataframe to a csv file
+        return False
+    else:
+        return user_input("Invalid response, please try again.")
+user_input()
+
+
 
