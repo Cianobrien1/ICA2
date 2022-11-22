@@ -53,4 +53,17 @@ with open(path2+"/"+output_file_name) as output_file_data:
     output_file_seq_count = output_file_content.count('>')
     if output_file_seq_count < 2:
         print('WARNING: Only 1 seuqence detected in fasta file')
+    if out_file_seq_count > 1000:
+        print('Sequence count has exceeded 1000, deleting extra sequences')
+        out_file_content2 = out_file_content.replace('>', '000', 1000)
+        out_file_content3 = out_file_content2.split('>', 1)
+        out_file_content4 = out_file_content3[0]
+        out_file_content5 = out_file_content4.replace('000', '>')
+        out_file_truncated = open(path2+"/"+output_file_name, 'w') 
+        out_file_truncated.write(out_file_content5)
+        out_file_truncated.close()
+
+        
+
+
 #Checks that more than 1 sequence is in the fasta file. If there less than 2 sequences in the file, it warns the user.
