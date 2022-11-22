@@ -16,7 +16,7 @@ def esearch_input () :
     protein_name_in= input('Enter protein name: ')
     taxonID= input('Enter taxon ID: ')
 #Takes user input for protein name, then taxon ID
-
+    #print(protein_name_in)
     protein_name_arg = protein_name_in.replace(" ", "_")
 #Replaces the spaces with underscore so I can use it to name the output file
 
@@ -26,22 +26,22 @@ def esearch_input () :
     os.system(esearch_cmd)
 #Calling the esearch_cmd variable defined above
 
-    return 
+    return protein_name_arg, taxonID, protein_name_in
 #Ending the function
 
-esearch_input()
+protein_name_arg, taxonID, protein_name_in = esearch_input()
 #Calling the function
 
-dir_content = os.listdir(path2)
+#dir_content = os.listdir(path2)
 #Listing the content of the directory to get the name of the output file created
 
-output_file_name = dir_content[0]
+output_file_name = protein_name_arg+'_'+taxonID+'.fasta' 
 #Assigning the output_file_name variable as the first item in the listdir() list.
 
 if os.stat(path2+"/"+output_file_name).st_size == 0:
     os.system('rm -fr {output_file_name}')
     print('Function input invalid, please try again')
-    esearch_input()
+    protein_name_arg, taxonID, protein_name_in = esearch_input()
 #If the esearch failed, the function will still create an output fasta file, but it will be empty. This checks if the output file is empty. If it is, it deletes the output file and tells the user the function input was invalid and asks to try again. It then calls the function again. 
 
 else:
@@ -53,7 +53,7 @@ with open(path2+"/"+output_file_name) as output_file_data:
     output_file_seq_count = output_file_content.count('>')
     if output_file_seq_count < 2:
         print('WARNING: Only 1 seuqence detected in fasta file')
-    if out_file_seq_count > 1000:
+    if output_file_seq_count > 1000:
         print('Sequence count has exceeded 1000, deleting extra sequences')
         out_file_content2 = out_file_content.replace('>', '000', 1000)
         out_file_content3 = out_file_content2.split('>', 1)
