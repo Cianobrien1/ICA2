@@ -52,14 +52,14 @@ def esearch_input () :
             print('WARNING: Too many sequences detected, please narrow search paramters or try a different query.')
             os.remove(esearch_path2+'/esearch_temp.txt')
             open(esearch_path2+'seqeunce_len_test', 'w')
-            return protein_name_arg, taxonID
+            return esearch_input()
 #If the number of sequences is greater than 1000, then it prints there were too many seqeunces and returns out of the function after deleting the temp file.
 
         elif esearch_temp4 < 3:
             print('WARNING: Too few seuqences detected, please try a different query.')
             open(esearch_path2+'seqeunce_len_test', 'w')
             os.remove(esearch_path2+'/esearch_temp.txt')
-            return protein_name_arg, taxonID
+            return esearch_input()
 #If there were less than 3 sequence (Minimum for clusalto according to ebi website) then it prints a warning and returns the function after deleting the temp file.
 
         else:
@@ -79,22 +79,23 @@ protein_name_arg, taxonID= esearch_input()
 output_file_name = protein_name_arg+'_'+taxonID+'.fasta' 
 #Assigning the output_file_name variable.
 
-if os.path.exists(esearch_path2+'sequence_len_test'):
-    protein_name_arg, taxonID= esearch_input()
-    os.remove(esearch_path2+'sequence_len_test')
-    output_file_name = protein_name_arg+'_'+taxonID+'.fasta' 
+#if os.path.exists(esearch_path2+'sequence_len_test'):
+#    protein_name_arg, taxonID = esearch_input()
+#    os.remove(esearch_path2+'sequence_len_test')
+#    output_file_name = protein_name_arg+'_'+taxonID+'.fasta' 
 #If the sequence_len_test file has been created then the file was either over 1000 or less than 3 sequences long. This re-calls the function then redefines the output_file_name variable so the user can input a different search query/
 
-if os.stat(esearch_path3+"/"+output_file_name).st_size == 0:
-    os.remove(esearch_path3+'/'+output_file_name)
-    print('Function input invalid, please try again')
-    protein_name_arg, taxonID = esearch_input()
-    output_file_name = protein_name_arg+'_'+taxonID+'.fasta' 
+#if os.path.exists(esearch_path3+"/"+output_file_name):
+#    if os.stat(esearch_path3+"/"+output_file_name).st_size == 0:
+#        os.remove(esearch_path3+'/'+output_file_name)
+#        print('Function input invalid, please try again')
+#        protein_name_arg, taxonID = esearch_input()
+#       output_file_name = protein_name_arg+'_'+taxonID+'.fasta' 
 
 #If the esearch failed, the function will still create an output fasta file, but it will be empty. This checks if the output file is empty. If it is, it deletes the output file and tells the user the function input was invalid and asks to try again. It then calls the function again and redefines the output_file_name variable.
 
-else:
-    print("Fasta file has been saved in esearch_output directory as "+output_file_name)
+#    else:
+print("Fasta file has been saved in esearch_output directory as "+output_file_name)
 #If the file contains text, it tells the user the file has been saved in the esearch_output directory
 
 ## START OF FASTA -> DATAFRAME/CSV ##
