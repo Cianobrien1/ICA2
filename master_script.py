@@ -48,11 +48,13 @@ def esearch_input () :
         if esearch_temp4 > 1000:
             print('WARNING: Too many sequences detected, please narrow search paramters or try a different query.')
             os.remove(esearch_path2+'/esearch_temp.txt')
+            open(esearch_path2+'seqeunce_len_test', 'w')
             return protein_name_arg, taxonID
 #If the number of sequences is greater than 1000, then it prints there were too many seqeunces and returns out of the function after deleting the temp file.
 
         elif esearch_temp4 < 3:
-            print('WARNING: Only 1 seuqence detected, please try a different query.')
+            print('WARNING: Too few seuqences detected, please try a different query.')
+            open(esearch_path2+'seqeunce_len_test', 'w')
             os.remove(esearch_path2+'/esearch_temp.txt')
             return protein_name_arg, taxonID
 #If there were less than 3 sequence (Minimum for clusalto according to ebi website) then it prints a warning and returns the function after deleting the temp file.
@@ -74,13 +76,19 @@ protein_name_arg, taxonID= esearch_input()
 output_file_name = protein_name_arg+'_'+taxonID+'.fasta' 
 #Assigning the output_file_name variable.
 
+if os.path.exists(esearch_path2+'sequence_len_test'):
+    protein_name_arg, taxonID= esearch_input()
+    os.remove(esearch_path2+'sequence_len_test')
+    output_file_name = protein_name_arg+'_'+taxonID+'.fasta' 
+#If the sequence_len_test file has been created then the file was either over 1000 or less than 3 sequences long. This re-calls the function then redefines the output_file_name variable so the user can input a different search query/
+
 if os.stat(esearch_path3+"/"+output_file_name).st_size == 0:
     os.remove(esearch_path3+'/'+output_file_name)
     print('Function input invalid, please try again')
     protein_name_arg, taxonID = esearch_input()
     output_file_name = protein_name_arg+'_'+taxonID+'.fasta' 
 
-#If the esearch failed, the function will still create an output fasta file, but it will be empty. This checks if the output file is empty. If it is, it deletes the output file and tells the user the function input was invalid and asks to try again. It then calls the function again. 
+#If the esearch failed, the function will still create an output fasta file, but it will be empty. This checks if the output file is empty. If it is, it deletes the output file and tells the user the function input was invalid and asks to try again. It then calls the function again and redefines the output_file_name variable.
 
 else:
     print("Fasta file has been saved in esearch_output directory as "+output_file_name)
@@ -135,30 +143,26 @@ s_seq = pd.Series(seq)
 
 df = pd.DataFrame({'ID' : s_id, 'Name' : s_name, 'Organism' : s_organism, 'Sequence' : s_seq})
 #Creates a dataframe with the series
+
 Organism_count = df['Organism'].value_counts()
 print(Organism_count)
 number_of_organisms = len(df['Organism'].value_counts())
+#Prints the organism name column to the screen, due panda being nice it ranks them in order of frequency automatically. Then prints the number of organisms in the file.
 
-def user_input(question= 'There are '+str(number_of_organisms)+' organisms represented in the FASTA file, do you want to continue?'):
+def user_input(question= 'There are '+str(number_of_organisms)+' organisms represented in the FASTA file, do you want to continue to clustalo alignment?'):
     reply = str(input(question+' [y/n]: ')).lower().strip()
     if reply[0] == 'y':
         csv_arg = fasta_path3+'/'+fasta_file+'.csv'
         df.to_csv(csv_arg, sep='\t')
-#Outputs dataframe to csv file
+#Outputs dataframe to csv file.
+
         return True
     if reply[0] == 'n':
         return False
     else:
         return user_input("Invalid response, please try again.")
 user_input()
-def continue_to_clustalo(question2= 'Would you like to continue to clusalo alignment?'):
-    reply2 = str(input(question2+' [y/n]: ')).lower().strip()
-    if reply[0] == 'y':
-        return True
-    if reply[0] == 'n':
-        return sys.exit()
-    else:
-        return continue_to_clustalo("Invalid response, please try again.")
+#Asks user if they would like to continue to clustalo alignment based on the number of organsims represented in the fasta file.
 
 ## START OF CLUSTALO ##
 clustalo_path1 = os.environ['HOME']
@@ -170,11 +174,18 @@ if os.path.exists(clustalo_path3) :
 os.mkdir(clustalo_path3)
 fasta_file_name = fasta_file
 fasta_file_name_only = fasta_file_name.replace('.fasta', '')
+#Defining variables that will be used for clustalo command.
+
 clustalo_arg1 = esearch_path3+'/'+fasta_file_name
 clustalo_arg2 = clustalo_path3+'/'+fasta_file_name_only+'.msf'
-clustalo_input = f"clustalo -i {clustalo_arg1} -o {clustalo_arg2} --outfmt=msf --wrap=80 --force --threads=6"
+#If I put these paths into the below clustalo_input variable without defining them as variables first it would not work. Defined these variables as a fix.
+
+clustalo_input = f"clustalo -i {clustalo_arg1} -o {clustalo_arg2} --outfmt=msf --wrap=80 --force --threads=32"
 os.system(clustalo_input)
+#Defines the clustalo input as a variable and runs it with os.system. --outfmt=msf outputs in msf format for plotcon to work. --threads=32 is to speed it up by multithreading. --force overwrites the file if it already exists. --wrap=80 tells it to allow 80 residues before a line wrap in the output file.
+
 print('clustalo alignment complete, saving msf file to clustalo_output directory...')
+#Prints that clustalo alignment is complete and has been saved to the output directory.
 
 ## START OF PLOTCON ##
 plotcon_path1 = os.environ['HOME']
@@ -185,12 +196,22 @@ if os.path.exists(plotcon_path2):
 os.mkdir(plotcon_path2)
 msf_file_name = fasta_file_name_only+'.msf'
 msf_file_name_only = msf_file_name.replace('.fasta.msf', '')
+#Defining the variables I will use in the plotcon command.
+
 plotcon_arg1 = clustalo_arg2
 plotcon_arg2 = plotcon_path2+'/'+msf_file_name_only
+#Similarly to the clustalo command, plotcon would not work without me defining these paths as variables before being used in the plotcon_input variables. 
+
 plotcon_input1 = f"plotcon -sequences {plotcon_arg1} -graph png -winsize 4 -goutfile {plotcon_arg2} >/dev/null"
+#First plotcon input that is run. It saves the plot as a png in the plotcon_output directory.
+
 plotcon_input2 = f"plotcon -sequences {plotcon_arg1} -graph x11 -winsize 4 -goutfile {plotcon_arg2} >/dev/null"
+#Second plotcon input that is run. Instead of saving the plot, it runs it as a pop up on the screen if the display supports it.
+
 os.system(plotcon_input1) 
 print('PNG of plot saved to plotcon_output directory')
+#Calling the first input command for plotcon and telling user where the file was saved.
+
 def plotcon_input_question(question3= 'Do you want to view the plot now?'):
     reply = str(input(question3+' [y/n]: ')).lower().strip()
     if reply[0] == 'y':
@@ -202,4 +223,4 @@ def plotcon_input_question(question3= 'Do you want to view the plot now?'):
     else:
         return plotcon_input_question("Invalid response, please try again.")
 plotcon_input_question()
-
+#Asks the user if they would like the view the plotcon plot now. If the answer is "y", then the 2nd plotcon input is run and a pop up of the plot is displayed if supported.
