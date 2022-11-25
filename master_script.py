@@ -26,6 +26,9 @@ def esearch_input () :
     taxonID= input('Enter taxon ID: ')
 #Takes user input for protein name, then taxon ID
 
+    print('Searching protein database, please wait...')
+#Tells user the search is sarting
+
     protein_name_arg = protein_name_in.replace(" ", "_")
 #Replaces the spaces with underscore so I can use it to name the output file
 
@@ -165,6 +168,9 @@ user_input()
 #Asks user if they would like to continue to clustalo alignment based on the number of organsims represented in the fasta file.
 
 ## START OF CLUSTALO ##
+print('Starting clustalo alignment...')
+#Tells the user clustalo alignment is starting
+
 clustalo_path1 = os.environ['HOME']
 os.chdir(clustalo_path1+'/ICA2')
 clustalo_path2 = os.getcwd()
@@ -187,7 +193,22 @@ os.system(clustalo_input)
 print('clustalo alignment complete, saving msf file to clustalo_output directory...')
 #Prints that clustalo alignment is complete and has been saved to the output directory.
 
+def clustalo_input_question(question3= 'Do you want to continue to plotcon?'):
+    reply = str(input(question3+' [y/n]: ')).lower().strip()
+    if reply[0] == 'y':
+        return True
+    if reply[0] == 'n':
+        print('Exiting script...')
+        return False
+    else:
+        return clustalo_input_question("Invalid response, please try again.")
+clustalo_input_question()
+#Asks user if they would like to continue to plotcon analysis, if not then the script exists.
+
 ## START OF PLOTCON ##
+print('Starting plotcon analysis...')
+#Tells user that plotcon is starting.
+
 plotcon_path1 = os.environ['HOME']
 os.chdir(plotcon_path1+'/ICA2')
 plotcon_path2 = plotcon_path1+'/ICA2/plotcon_output'
