@@ -40,6 +40,7 @@ def esearch_input () :
 
     os.system(esearch_cmd1)
 #Calling the esearch_cmd variable defined above
+
     if os.stat(esearch_path1+'/ICA2/error.txt').st_size == 0:
         esearch_temp1 = open(esearch_path2+'/esearch_temp.txt')
         esearch_temp2 = esearch_temp1.read()
@@ -51,13 +52,11 @@ def esearch_input () :
         if esearch_temp4 > 1000:
             print('WARNING: Too many sequences detected, please narrow search paramters or try a different query.')
             os.remove(esearch_path2+'/esearch_temp.txt')
-            open(esearch_path2+'seqeunce_len_test', 'w')
             return esearch_input()
 #If the number of sequences is greater than 1000, then it prints there were too many seqeunces and returns out of the function after deleting the temp file.
 
         elif esearch_temp4 < 3:
             print('WARNING: Too few seuqences detected, please try a different query.')
-            open(esearch_path2+'seqeunce_len_test', 'w')
             os.remove(esearch_path2+'/esearch_temp.txt')
             return esearch_input()
 #If there were less than 3 sequence (Minimum for clusalto according to ebi website) then it prints a warning and returns the function after deleting the temp file.
@@ -68,9 +67,9 @@ def esearch_input () :
             return protein_name_arg, taxonID
 #If there at more than 3 but less than 1000 sequences, then esearch_cmd2 is ran which fetches the file and outputs it in fasta format after deleting the temp file.
     else:
-        os.system(esearch_cmd2)
         os.remove(esearch_path2+'/error.txt')
-        return protein_name_arg, taxonID
+        print('Invalid search input, please try again.')
+        return esearch_input()
 #Ending the function
 
 protein_name_arg, taxonID= esearch_input()
