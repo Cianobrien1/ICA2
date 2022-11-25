@@ -245,3 +245,16 @@ def plotcon_input_question(question3= 'Do you want to view the plot now?'):
         return plotcon_input_question("Invalid response, please try again.")
 plotcon_input_question()
 #Asks the user if they would like the view the plotcon plot now. If the answer is "y", then the 2nd plotcon input is run and a pop up of the plot is displayed if supported.
+
+## START OF PROSITE DATABASE SCAN ##
+os.chdir(esearch_path1+'/ICA2')
+prosite_path2 = os.getcwd()
+prosite_path3 = prosite_path2+'/split_fasta_dir'
+prosite_path4 = esearch_path3+'/'+output_file_name
+if os.path.exists(prosite_path3):
+    shutil.rmtree(prosite_path3)
+os.mkdir(prosite_path3)
+seqretsplit_cmd = f"seqretsplit -sequence {prosite_path4} -outseq *.fasta -osdirectory2 {prosite_path3}"
+os.system(seqretsplit_cmd)
+
+
