@@ -5,6 +5,7 @@ import shutil
 from pathlib import Path
 import pandas as pd
 import sys
+import glob
 #Importing necessary modules
 
 ## START OF ESEARCH ##
@@ -246,6 +247,18 @@ def plotcon_input_question(question3= 'Do you want to view the plot now?'):
 plotcon_input_question()
 #Asks the user if they would like the view the plotcon plot now. If the answer is "y", then the 2nd plotcon input is run and a pop up of the plot is displayed if supported.
 
+def prosite_continue_question(question3= 'Do you want to scan protein sequences against PROSITE motif database?'):
+    reply = str(input(question3+' [y/n]: ')).lower().strip()
+    if reply[0] == 'y':
+        return True
+    if reply[0] == 'n':
+        print('Exiting script...')
+        return False
+    else:
+        return prosite_continue_question("Invalid response, please try again.")
+prosite_continue_question()
+#Asks the user if they want to continue to PROSITE motif database scan.
+
 ## START OF PROSITE DATABASE SCAN ##
 os.chdir(esearch_path1+'/ICA2')
 prosite_path2 = os.getcwd()
@@ -254,7 +267,27 @@ prosite_path4 = esearch_path3+'/'+output_file_name
 if os.path.exists(prosite_path3):
     shutil.rmtree(prosite_path3)
 os.mkdir(prosite_path3)
+#Defining the variables used for seqretsplit.
+
 seqretsplit_cmd = f"seqretsplit -sequence {prosite_path4} -outseq *.fasta -osdirectory2 {prosite_path3}"
 os.system(seqretsplit_cmd)
+#Using seqretsplit to split the sinlge fasta file into individual fasta files with 1 sequence each as patmatmotif only accepts 1 sequence at a time.
 
+if os.path.exists(prosite_path2+'/PROSITE_dir'):
+        shutil.rmtree(prosite_path2+'/PROSITE_dir')
+os.mkdir(prosite_path2+'/PROSITE_dir')
+prosite_path5 = prosite_path2+'/PROSITE_dir'
+pathlist = Path(prosite_path3).glob('*.fasta')
+split_seq_names = os.listdir(prosite_path5)
+#Assigning variables to be used below. Used Path module to iterate throughthe the split fasta files.
+
+print('Scanning protein sequences against PROSITE database of motifs...')
+#Print statment to tell the user PROSITE database scan is begining.
+
+for files in pathlist:
+    patmatmotif_cmd = f"patmatmotifs -sequence {files} -outfile {files}.dbmotif"
+    os.system(patmatmotif_cmd)
+for f in glob.iglob(prosite_path3+'/*.dbmotif'):
+    shutil.move(f, prosite_path5)
+#Used a loop to iterate through the files in the split_fasta_dir directory and pass them through patmatmotif to scan for the PROSITE database motifs. Used glob module to select the files ending in .dbmotif, which are the output of patmatmotif, to move them from the split_fasta_dir to the PROSITE_out directory.I had issues with patmatmotif output so this was the best solution I found that didn't involve using os.system() with a bash command.
 
