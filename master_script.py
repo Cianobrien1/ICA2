@@ -291,10 +291,10 @@ for f in glob.iglob(prosite_path3+'/*.dbmotif'):
 #Used a loop to iterate through the files in the split_fasta_dir directory and pass them through patmatmotif to scan for the PROSITE database motifs. Used glob module to select the files ending in .dbmotif, which are the output of patmatmotif, to move them from the split_fasta_dir to the PROSITE_out directory.I had issues with patmatmotif output so this was the best solution I found that didn't involve using os.system() with a bash command.
 
 prosite_pathlist = Path(prosite_path5).glob('*')
-if os.path.exists(prosite_path2+'/PROSITE_hits'):
-        shutil.rmtree(prosite_path2+'PROSITE_hits', ignore_errors=True)
-Path(prosite_path2+'/PROSITE_hits').mkdir(parents=True, exist_ok=True)
 move_path = prosite_path2+'/PROSITE_hits'
+if os.path.exists(move_path):
+        shutil.rmtree(move_path)
+Path(move_path).mkdir(parents=True, exist_ok=True)
 #Defining varibles that will be used below to move all files with hits to a seperate directory.
 for i in prosite_pathlist:
     open_file = open(i)
