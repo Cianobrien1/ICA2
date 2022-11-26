@@ -45,7 +45,7 @@ def esearch_input () :
     if os.stat(esearch_path1+'/ICA2/error.txt').st_size == 0:
         esearch_temp1 = open(esearch_path2+'/esearch_temp.txt')
         esearch_temp2 = esearch_temp1.read()
-        esearch_temp3 = re.split(r"<|>", esearch_temp2)
+        esearch_temp3 = re.split(r"<|>", esearch_temp2) #<Count>234</Count>
         esearch_temp4 = int(esearch_temp3[2])
         os.remove(esearch_path2+'/error.txt')
 #If the erorr.txt file has content (if the esearch command returned an error) then the sequence count is found and defined as the esearch_temp4 varaible. The intinsure it is an integer before being passed to the next if statment. Regex is used to split the <Count> line in the output file made by the esearch_cmd1 variable at '<' and '>'. The index of the number of sequences is known, which can then be defined to a varible to be used below.
@@ -178,7 +178,7 @@ clustalo_path2 = os.getcwd()
 clustalo_path3 = clustalo_path2+'/clusalto_output'
 if os.path.exists(clustalo_path3) :
     shutil.rmtree(clustalo_path3)
-os.mkdir(clustalo_path3)
+Path(clustalo_path3).mkdir(parents=True, exist_ok=True)
 fasta_file_name = fasta_file
 fasta_file_name_only = fasta_file_name.replace('.fasta', '')
 #Defining variables that will be used for clustalo command.
@@ -215,7 +215,7 @@ os.chdir(plotcon_path1+'/ICA2')
 plotcon_path2 = plotcon_path1+'/ICA2/plotcon_output'
 if os.path.exists(plotcon_path2):
     shutil.rmtree(plotcon_path2)
-os.mkdir(plotcon_path2)
+Path(plotcon_path2).mkdir(parents=True, exist_ok=True)
 msf_file_name = fasta_file_name_only+'.msf'
 msf_file_name_only = msf_file_name.replace('.fasta.msf', '')
 #Defining the variables I will use in the plotcon command.
@@ -266,7 +266,7 @@ prosite_path3 = prosite_path2+'/split_fasta_dir'
 prosite_path4 = esearch_path3+'/'+output_file_name
 if os.path.exists(prosite_path3):
     shutil.rmtree(prosite_path3)
-os.mkdir(prosite_path3)
+Path(prosite_path3).mkdir(parents=True, exist_ok=True)
 #Defining the variables used for seqretsplit.
 
 seqretsplit_cmd = f"seqretsplit -sequence {prosite_path4} -outseq *.fasta -osdirectory2 {prosite_path3}"
@@ -275,10 +275,9 @@ os.system(seqretsplit_cmd)
 
 if os.path.exists(prosite_path2+'/PROSITE_dir'):
         shutil.rmtree(prosite_path2+'/PROSITE_dir')
-os.mkdir(prosite_path2+'/PROSITE_dir')
+Path(prosite_path2+'/PROSITE_dir').mkdir(parents=True, exist_ok=True)
 prosite_path5 = prosite_path2+'/PROSITE_dir'
 pathlist = Path(prosite_path3).glob('*.fasta')
-split_seq_names = os.listdir(prosite_path5)
 #Assigning variables to be used below. Used Path module to iterate throughthe the split fasta files.
 
 print('Scanning protein sequences against PROSITE database of motifs...')
@@ -291,3 +290,32 @@ for f in glob.iglob(prosite_path3+'/*.dbmotif'):
     shutil.move(f, prosite_path5)
 #Used a loop to iterate through the files in the split_fasta_dir directory and pass them through patmatmotif to scan for the PROSITE database motifs. Used glob module to select the files ending in .dbmotif, which are the output of patmatmotif, to move them from the split_fasta_dir to the PROSITE_out directory.I had issues with patmatmotif output so this was the best solution I found that didn't involve using os.system() with a bash command.
 
+prosite_pathlist = Path(prosite_path5).glob('*')
+if os.path.exists(prosite_path2+'/PROSITE_hits'):
+        shutil.rmtree(prosite_path2+'PROSITE_hits', ignore_errors=True)
+Path(prosite_path2+'/PROSITE_hits').mkdir(parents=True, exist_ok=True)
+move_path = prosite_path2+'/PROSITE_hits'
+#Defining varibles that will be used below to move all files with hits to a seperate directory.
+for i in prosite_pathlist:
+    open_file = open(i)
+    read_file = open_file.read()
+    list_file = read_file.split('\n')
+#Loops through files in the output directory from the patmatmotif search, opens the file and splits the file based on new lines.
+
+    if any("HitCount" in s for s in list_file):
+#Using the any function to identiy substring in the list of lines in the file to find the line that contains "HitCount".
+
+        matching = [s for s in list_file if "HitCount" in s]
+#Adds any index in the list that contains "HitCount" to the list "matching".
+
+        hitcount_join = ' '.join(matching)
+        hitcount_list = hitcount_join.split(':')
+        hitcount_int = int(hitcount_list[1])
+#join the matching list, then split again using  ':' as the split character as I know the number of counts will come after the ':',and only 1 ':' is in the line, then the count number will be the 2nd position in the list, aka the first index. Making sure the count number is an integer as well.
+
+        if hitcount_int > 0:
+            shutil.move(str(i), move_path)
+#If the count number is more than 0, then the file gets moved to the PROSITE_hits directory for the user to view. str() had to be used to convert the path back to a string as shutil will only recognise it as a string.
+
+print('Sequences with PROSITE motif database hits have been saved to PROSITE_hits directory.\nThe accession number of the sequence is the file name of the .dbmotif file.')
+#Telling the user where to find the sequences with the PROSITE_hits and how the files are named.
