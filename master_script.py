@@ -123,7 +123,6 @@ organism = []
 seq = []
 #Defining the lists I will be using in the for loop below
 
-
 for eachline in my_file:
     if eachline.startswith('>'):
 #This checks if the line starts which ">" indicating it is the title of the fasta sequence
@@ -204,9 +203,23 @@ if os.path.exists(clustalo_path2+'/info_align_dir'):
 Path(clustalo_path2+'/info_align_dir').mkdir(parents=True, exist_ok=True)
 infoalign_out = clustalo_path2+'/info_align_dir/'+fasta_file_name_only
 infoalign_input = f"infoalign -sequence {clustalo_arg2} -outfile {infoalign_out}.infoalign"
-os.system(infoalign_input)
-print('An infoalign file has been created displaying information about the sequence alignment in the info_align_dir directory.\n Navigate to this directory to view results.')
+#Defining the variables to be used for infoalign emboss programme. It shows basic information about sequence alignment in a text file. I thought this might be useful the user to get extra information about the alignment of the protein sequences as part of the "wildcard" option. 
 
+os.system(infoalign_input)
+print('An infoalign file has been created displaying information about the sequence alignment in the info_align_dir directory.\nNavigate to this directory to view results.')
+#Running the command variable and telling the user where to find the output file.
+
+## SHOW ALIGN ##
+if os.path.exists(clustalo_path2+'show_align_dir'):
+    shutil.rmtree(clustalo_path2+'show_align_dir')
+Path(clustalo_path2+'/show_align_dir').mkdir(parents=True, exist_ok=True)
+show_align_out = clustalo_path2+'/show_align_dir/'+fasta_file_name_only
+show_align_input = f"showalign -sequence {clustalo_arg2} -outfile {show_align_out}.showalign"
+#Defining the variables to be used for showalign. This is an emboss tool that visually represents the alignmnet of the protein sequences. This is also part of the "wildcard" option. 
+
+os.system(show_align_input)
+print('A show align file has been created displaying the alignment of the protein sequences visually in the show_align_dir directory.\nNavigate to this directory to view results')
+#Running the command variable and telling the user how to find the output file for showalign.
 
 def clustalo_input_question(question3= 'Do you want to continue to plotcon?'):
     reply = str(input(question3+' [y/n]: ')).lower().strip()
@@ -224,7 +237,7 @@ clustalo_input_question()
 print('Starting plotcon analysis, please wait...')
 #Tells user that plotcon is starting.
 
-plotcon_path1 = os.environ['HOME']
+plotcon_path1 = os.environ['HOME'] 
 os.chdir(plotcon_path1+'/ICA2')
 plotcon_path2 = plotcon_path1+'/ICA2/plotcon_output'
 if os.path.exists(plotcon_path2):
