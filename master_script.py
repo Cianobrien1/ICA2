@@ -37,11 +37,11 @@ def esearch_input () :
     protein_name_arg = protein_name_in.replace(" ", "_")
 #Replaces the spaces with underscore so I can use it to name the output file
 
-    esearch_cmd1 =  f"esearch -db protein -query '{protein_name_in}[PROTEIN]' 2>~/ICA2/error.txt | efilter -query txid'{taxonID}'[ORGANISM] NOT PARTIAL 2>~/ICA2/error.txt | grep '<Count>' > ~/ICA2/esearch_temp.txt"
+    esearch_cmd1 =  f"esearch -db protein -query '{protein_name_in}[PROTEIN]' 2>~/ICA2/error.txt | efilter -query txid'{taxonID}'[ORGANISM] 2>~/ICA2/error.txt | grep '<Count>' > ~/ICA2/esearch_temp.txt"
 #First esearch command used to find the number of sequences. 2>~/ICA2/error.txt creates an error.txt file to pass the errors to if user enters an incorrect sequence
 
-    esearch_cmd2 =  f"esearch -db protein -query '{protein_name_in}[PROTEIN]' 2>/dev/null | efilter -query txid'{taxonID}'[ORGANISM] NOT PARTIAL 2>/dev/null | efetch -format fasta 2>/dev/null > ~/ICA2/esearch_output/{protein_name_arg}_{taxonID}.fasta"
-#esearch command that takes the input from the user as the arguements for the search. 2>/dev/null mutes error messages as to not spam the screen if incorrect input has been entered. efilter allows for the search to be narrowed to a single taxon. NOT PARTIAL removes partial sequences. Used f-string formatting to define the variable.
+    esearch_cmd2 =  f"esearch -db protein -query '{protein_name_in}[PROTEIN]' 2>/dev/null | efilter -query txid'{taxonID}'[ORGANISM] 2>/dev/null | efetch -format fasta 2>/dev/null > ~/ICA2/esearch_output/{protein_name_arg}_{taxonID}.fasta"
+#esearch command that takes the input from the user as the arguements for the search. 2>/dev/null mutes error messages as to not spam the screen if incorrect input has been entered. efilter allows for the search to be narrowed to a single taxon. Used f-string formatting to define the variable.
 
     os.system(esearch_cmd1)
 #Calling the esearch_cmd variable defined above
@@ -83,22 +83,10 @@ protein_name_arg, taxonID= esearch_input()
 output_file_name = protein_name_arg+'_'+taxonID+'.fasta' 
 #Assigning the output_file_name variable.
 
-#if os.path.exists(esearch_path2+'sequence_len_test'):
-#    protein_name_arg, taxonID = esearch_input()
-#    os.remove(esearch_path2+'sequence_len_test')
-#    output_file_name = protein_name_arg+'_'+taxonID+'.fasta' 
-#If the sequence_len_test file has been created then the file was either over 1000 or less than 3 sequences long. This re-calls the function then redefines the output_file_name variable so the user can input a different search query/
+#partial_test = open(esearch_path3+'/'+output_file_name, 'r+')
+#for Y in partial_test:
+#    if 'partial' in Y:
 
-#if os.path.exists(esearch_path3+"/"+output_file_name):
-#    if os.stat(esearch_path3+"/"+output_file_name).st_size == 0:
-#        os.remove(esearch_path3+'/'+output_file_name)
-#        print('Function input invalid, please try again')
-#        protein_name_arg, taxonID = esearch_input()
-#       output_file_name = protein_name_arg+'_'+taxonID+'.fasta' 
-
-#If the esearch failed, the function will still create an output fasta file, but it will be empty. This checks if the output file is empty. If it is, it deletes the output file and tells the user the function input was invalid and asks to try again. It then calls the function again and redefines the output_file_name variable.
-
-#    else:
 print("Fasta file has been saved in esearch_output directory as "+output_file_name)
 #If the file contains text, it tells the user the file has been saved in the esearch_output directory
 
