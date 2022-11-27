@@ -162,7 +162,7 @@ def user_input(question= 'There are '+str(number_of_organisms)+' organisms repre
 
         return True
     if reply[0] == 'n':
-        return False
+        return sys.exit()
     else:
         return user_input("Invalid response, please try again.")
 user_input()
@@ -194,13 +194,22 @@ os.system(clustalo_input)
 print('clustalo alignment complete, saving msf file to clustalo_output directory...')
 #Prints that clustalo alignment is complete and has been saved to the output directory.
 
+## INFO ALIGN ##
+if os.path.exists(clustalo_path2+'/info_align_dir'):
+    shutil.rmtree(clustalo_path2+'/info_align_dir')
+Path(clustalo_path2+'/info_align_dir').mkdir(parents=True, exist_ok=True)
+infoalign_out = clustalo_path2+'/info_align_dir/'+fasta_file_name
+infoalign_input = f"infoalign -sequence {clustalo_arg2} -outfile {infoalign_out}"
+print('An infoalign file has been created displaying information about the sequence alignment in the info_align_dir directory.')
+
+
 def clustalo_input_question(question3= 'Do you want to continue to plotcon?'):
     reply = str(input(question3+' [y/n]: ')).lower().strip()
     if reply[0] == 'y':
         return True
     if reply[0] == 'n':
         print('Exiting script...')
-        return False
+        return sys.exit()
     else:
         return clustalo_input_question("Invalid response, please try again.")
 clustalo_input_question()
@@ -241,7 +250,7 @@ def plotcon_input_question(question3= 'Do you want to view the plot now?'):
         return True
     if reply[0] == 'n':
         print('To view plot, download the png file from the plotcon_output directory')
-        return False
+        return sys.exit()
     else:
         return plotcon_input_question("Invalid response, please try again.")
 plotcon_input_question()
@@ -253,7 +262,7 @@ def prosite_continue_question(question3= 'Do you want to scan protein sequences 
         return True
     if reply[0] == 'n':
         print('Exiting script...')
-        return False
+        return sys.exit()
     else:
         return prosite_continue_question("Invalid response, please try again.")
 prosite_continue_question()
