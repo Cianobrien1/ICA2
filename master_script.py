@@ -83,9 +83,23 @@ protein_name_arg, taxonID= esearch_input()
 output_file_name = protein_name_arg+'_'+taxonID+'.fasta' 
 #Assigning the output_file_name variable.
 
-#partial_test = open(esearch_path3+'/'+output_file_name, 'r+')
-#for Y in partial_test:
-#    if 'partial' in Y:
+## SKIP REDUNDANT ##
+skip_redundant_arg1 = esearch_path3+'/'+output_file_name
+skip_redundant_cmd = f"skipredundant -sequences {skip_redundant_arg1} -minthreshold 30.0 -maxthreshold 90.0 -gapopen 10.0 -gapextend 0.5 -redundantoutseq '' -mode 2 -outseq {skip_redundant_arg1}"
+#Skip redudant removes redudnant sequences from fasta files based on defined thresholds.I chose all the default skipredundant values. I wrote the output file to the same file path as the fasta input file to replace the original file with the trimmed one to make subsequent analysis easier in the rest of the script. 
+
+def skip_redundant_question(question3= 'Do you want to remove sequences with over 90% and below 30% similarity?'):
+    reply = str(input(question3+' [y/n]: ')).lower().strip()
+    if reply[0] == 'y':
+        os.system(skip_redundant_cmd)
+        return True
+    if reply[0] == 'n':
+        print('Continuing without removing seuqences...')
+        return True
+    else:
+        return skip_redundant_question("Invalid response, please try again.")
+skip_redundant_question()
+#Asks the user if they would like to remove sequences with greater than 90% similarity and less than 30% similarity. These are the default values of skipredundant. If they choose yes the sequences are removed and the script continues. If they choose no then the sequences are left as they are and kept for subsequent analysis. This was one of my wildcard options. 
 
 print("Fasta file has been saved in esearch_output directory as "+output_file_name)
 #If the file contains text, it tells the user the file has been saved in the esearch_output directory
