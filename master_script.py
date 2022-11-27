@@ -8,6 +8,10 @@ import sys
 import glob
 #Importing necessary modules
 
+## Intro to Script ##
+os.system('clear')
+print('This script is for sequence conservation analysis of user-defined protein sequences within a user-defined taxon.\nThe maximum allowed number of sequences is 1000.\nThe minumum allowed number of sequences is 3.\nInput your search paramaters below.')
+
 ## START OF ESEARCH ##
 esearch_path1 = os.environ['HOME']
 Path(esearch_path1+'/ICA2').mkdir(parents = True, exist_ok=True)
@@ -169,7 +173,7 @@ user_input()
 #Asks user if they would like to continue to clustalo alignment based on the number of organsims represented in the fasta file.
 
 ## START OF CLUSTALO ##
-print('Starting clustalo alignment...')
+print('Starting clustalo alignment, please wait...')
 #Tells the user clustalo alignment is starting
 
 clustalo_path1 = os.environ['HOME']
@@ -198,9 +202,10 @@ print('clustalo alignment complete, saving msf file to clustalo_output directory
 if os.path.exists(clustalo_path2+'/info_align_dir'):
     shutil.rmtree(clustalo_path2+'/info_align_dir')
 Path(clustalo_path2+'/info_align_dir').mkdir(parents=True, exist_ok=True)
-infoalign_out = clustalo_path2+'/info_align_dir/'+fasta_file_name
-infoalign_input = f"infoalign -sequence {clustalo_arg2} -outfile {infoalign_out}"
-print('An infoalign file has been created displaying information about the sequence alignment in the info_align_dir directory.')
+infoalign_out = clustalo_path2+'/info_align_dir/'+fasta_file_name_only
+infoalign_input = f"infoalign -sequence {clustalo_arg2} -outfile {infoalign_out}.infoalign"
+os.system(infoalign_input)
+print('An infoalign file has been created displaying information about the sequence alignment in the info_align_dir directory.\n Navigate to this directory to view results.')
 
 
 def clustalo_input_question(question3= 'Do you want to continue to plotcon?'):
@@ -216,7 +221,7 @@ clustalo_input_question()
 #Asks user if they would like to continue to plotcon analysis, if not then the script exists.
 
 ## START OF PLOTCON ##
-print('Starting plotcon analysis...')
+print('Starting plotcon analysis, please wait...')
 #Tells user that plotcon is starting.
 
 plotcon_path1 = os.environ['HOME']
@@ -250,7 +255,7 @@ def plotcon_input_question(question3= 'Do you want to view the plot now?'):
         return True
     if reply[0] == 'n':
         print('To view plot, download the png file from the plotcon_output directory')
-        return sys.exit()
+        return False
     else:
         return plotcon_input_question("Invalid response, please try again.")
 plotcon_input_question()
