@@ -83,6 +83,33 @@ protein_name_arg, taxonID= esearch_input()
 output_file_name = protein_name_arg+'_'+taxonID+'.fasta' 
 #Assigning the output_file_name variable.
 
+## REMOVE PARTIAL SEQUENCES ##
+def remove_partial_question(question3= 'Do you want to remove partial sequences?'):
+    reply = str(input(question3+' [y/n]: ')).lower().strip()
+    if reply[0] == 'y':
+        print('Removing partial sequences, please wait...')
+        partial_lines = list()
+        with open(esearch_path3+'/'+output_file_name) as partial_file:
+            next_line = False
+            for partial_line in partial_file.readlines():
+                if next_line:
+                    next_line = False
+                    continue
+                if "partial" in partial_line:
+                    next_line = True
+                    continue
+                partial_lines.append(partial_line)
+        with open(esearch_path3+'/'+output_file_name, "w") as partial_file:
+            partial_file.writelines(partial_lines)
+        return True
+    if reply[0] == 'n':
+        print('Continuing without removing partial seuqences...')
+        return True
+    else:
+        return remove_partial_question("Invalid response, please try again.")
+remove_partial_question()
+#Asks the user if they would like to remove partial sequences. If they answer yes, then the code above find the lines with "partial" and removes them, along with the sequence by overwiting the original fasta file with a new one containing only non-partial sequences. 
+
 ## SKIP REDUNDANT ##
 skip_redundant_arg1 = esearch_path3+'/'+output_file_name
 skip_redundant_cmd = f"skipredundant -sequences {skip_redundant_arg1} -minthreshold 30.0 -maxthreshold 90.0 -gapopen 10.0 -gapextend 0.5 -redundantoutseq '' -mode 2 -outseq {skip_redundant_arg1}"
@@ -91,6 +118,7 @@ skip_redundant_cmd = f"skipredundant -sequences {skip_redundant_arg1} -minthresh
 def skip_redundant_question(question3= 'Do you want to remove sequences with over 90% and below 30% similarity?'):
     reply = str(input(question3+' [y/n]: ')).lower().strip()
     if reply[0] == 'y':
+        print('Removing sequences, this may take a while, please wait...')
         os.system(skip_redundant_cmd)
         return True
     if reply[0] == 'n':
@@ -99,7 +127,7 @@ def skip_redundant_question(question3= 'Do you want to remove sequences with ove
     else:
         return skip_redundant_question("Invalid response, please try again.")
 skip_redundant_question()
-#Asks the user if they would like to remove sequences with greater than 90% similarity and less than 30% similarity. These are the default values of skipredundant. If they choose yes the sequences are removed and the script continues. If they choose no then the sequences are left as they are and kept for subsequent analysis. This was one of my wildcard options. 
+#Asks the user if they would like to remove sequences with greater than 90% similarity and less than 30% similarity. These are the default values of skipredundant. If they choose yes the sequences are removed and the script continues. If they choose no then the sequences are left as they are and kept for subsequent analysis. 
 
 print("Fasta file has been saved in esearch_output directory as "+output_file_name)
 #If the file contains text, it tells the user the file has been saved in the esearch_output directory
@@ -150,12 +178,12 @@ s_organism = pd.Series(organism)
 s_seq = pd.Series(seq)
 #Converts the lists to series
 
-df = pd.DataFrame({'ID' : s_id, 'Name' : s_name, 'Organism' : s_organism, 'Sequence' : s_seq})
+df = pd.DataFrame({'Accessoin Number' : s_id, 'Protein Name' : s_name, 'Organism Name' : s_organism, 'Sequence' : s_seq})
 #Creates a dataframe with the series
 
-Organism_count = df['Organism'].value_counts()
+Organism_count = df['Organism Name'].value_counts()
 print(Organism_count)
-number_of_organisms = len(df['Organism'].value_counts())
+number_of_organisms = len(df['Organism Name'].value_counts())
 #Prints the organism name column to the screen, due panda being nice it ranks them in order of frequency automatically. Then prints the number of organisms in the file.
 
 def user_input(question= 'There are '+str(number_of_organisms)+' organisms represented in the FASTA file, do you want to continue to clustalo alignment?'):
@@ -204,12 +232,26 @@ if os.path.exists(clustalo_path2+'/info_align_results'):
     shutil.rmtree(clustalo_path2+'/info_align_results')
 Path(clustalo_path2+'/info_align_results').mkdir(parents=True, exist_ok=True)
 infoalign_out = clustalo_path2+'/info_align_results/'+fasta_file_name_only
-infoalign_input = f"infoalign -sequence {clustalo_arg2} -outfile {infoalign_out}.infoalign"
-#Defining the variables to be used for infoalign emboss programme. It shows basic information about sequence alignment in a text file. I thought this might be useful the user to get extra information about the alignment of the protein sequences as part of the "wildcard" option. 
+infoalign_input1 = f"infoalign -sequence {clustalo_arg2} -outfile {infoalign_out}.infoalign -only -change -idcount -simcount -diffcount -heading"
+infoalign_input2 = f"infoalign -sequence {clustalo_arg2} -outfile {infoailign_out}.infoalign -only -name -change -idcount -simcount -diffcount -heading"
+#Defining the variables to be used for infoalign emboss programme. It shows basic information about sequence alignment in a text file. I thought this might be useful the user to get extra information about the alignment of the protein sequences. The first one is for creating the dataframe, the second command is used for saving the infoalign output file for the user to view if it is needed.
 
-os.system(infoalign_input)
-print('An infoalign file has been created displaying information about the sequence alignment in the info_align_results directory.\nNavigate to this directory to view results.')
-#Running the command variable and telling the user where to find the output file.
+os.system(infoalign_input1)
+#Running the first command variable 
+
+df1 = pd.read_csv(infoalign_out+'.infoalign', sep='\t')
+Ident = str(df1['# Ident'].agg(['max','min','mean','std']))
+Similar = str(df1['Similar'].agg(['max','min','mean','std']))
+Differ = str(df1['Differ'].agg(['max','min','mean','std']))
+Change = str(df1['% Change'].agg(['max','min','mean','std']))
+#Assigning the aggregates of the max, min, mean and standard deviation to their respective variables to be printed to the user below
+
+print('Aggregate of number of identical residues =\n'+Ident+'\nAggregate of number of similar residues =\n'+Similar+'\nAggregate of number of different residues =\n '+Differ+'\nAggregate of percentage changed positions =\n'+Change) 
+os.system(infoalign_input2)
+#Running the 2nd command variable
+print('An infoalign file has been created displaying information about the sequence alignment in the info_align_ esults directory.\nNavigate to this directory to view results.')
+#Prints where to find the infoalign output file to the user.
+#This is my "wildcard" option. It converts the info align output file into a dataframe, then uses that dataframe to get an aggregate of stats for the sequences. It then prints that info to the user, which gives extra, easily accessible info about the sequence alignments to the user.
 
 ## SHOW ALIGN ##
 if os.path.exists(clustalo_path2+'show_align_results'):
@@ -217,7 +259,7 @@ if os.path.exists(clustalo_path2+'show_align_results'):
 Path(clustalo_path2+'/show_align_results').mkdir(parents=True, exist_ok=True)
 show_align_out = clustalo_path2+'/show_align_results/'+fasta_file_name_only
 show_align_input = f"showalign -sequence {clustalo_arg2} -outfile {show_align_out}.showalign"
-#Defining the variables to be used for showalign. This is an emboss tool that visually represents the alignmnet of the protein sequences. This is also part of the "wildcard" option. 
+#Defining the variables to be used for showalign. This is an emboss tool that visually represents the alignmnet of the protein sequences.
 
 os.system(show_align_input)
 print('A show align file has been created displaying the alignment of the protein sequences visually in the show_align_results directory.\nNavigate to this directory to view results')
